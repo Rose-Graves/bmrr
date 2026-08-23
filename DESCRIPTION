@@ -26,3 +26,5 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+URL: https://github.com/Rose-Graves/bmrr
+BugReports: https://github.com/Rose-Graves/bmrr/issues
