@@ -1,130 +1,30 @@
 
-# Function: Simulating Data ----------------------------------------------------
-
-simulate_data <- function(num_items,
-                          same_alpha,
-                          num_criteria,
-                          num_raters,
-                          same_sigma,
-                          num_covars,
-                          partial_raters,
-                          missing_percent,
-                          seed,
-                          sigma_value = 1
-){
-
-  #num_items: The number of items (integer)
-  #same_alpha: Do you want the alpha parameter across all items (boolean)
-  #num_criteria: The number of criteria (integer)
-  #num_raters: The number of raters (integer)
-  #same_sigma: Do you want the same sigma parameter across all items (boolean)
-  #num_covars: The number of covariates (integer)
-  #partial_raters: the number of raters with partial rankings (integer)
-  #missing_percent: the percentage of items that partial raters did not rank (real number between 0,1)
-  #seed: the seed duh
-
-  #--- Set seed
-  set.seed(seed)
-
-  #--- get the hierarchical means
-  xi_true = get_true_xi(num_items)
-
-  #--- get hierarchical variance
-  alpha_true = get_true_alpha(num_items, same_alpha)
-
-  #--- get random effects
-  mu_true = get_true_mu(xi_true, alpha_true, num_items, num_criteria)
-
-  #--- get the rater variance
-  sigma_true = get_sigma_true(num_raters, same_sigma, sigma_value)
-
-
-  if(num_covars >0){
-
-    ##---  Covariates
-    #--- Get true betas
-    beta_true <- c(1, get_true_betas(num_covars))
-
-    #--- simulate the covariates
-    covars <- simulate_covars(num_items,num_covars)
-
-    #--- putting covariates into easier format to use
-    X = covars
-    for(i in 1:(num_criteria-1)){
-      X = X %>% rbind(covars)
-    }
-    xtx = as.matrix(t(X))%*%as.matrix(X)
-
-    #--- covariate impact on latent z
-    covars_impact <- t(beta_true%*%t(as.matrix(covars)))
-
-    #--- replicating covariates for all criteria
-    covars_impact_matrix <- matrix(rep(covars_impact, num_criteria), ncol = num_criteria)
-
-    #--- Getting latent z before error
-    mu_covars_true = mu_true + covars_impact_matrix
-
-    player_random_matrix = mu_covars_true
-
-    ##--- Simulate the data
-    data <- simulate_z(
-      player_random_matrix, sigma_true,
-      num_items, num_raters, num_criteria,
-      partial_raters, missing_percent,
-      rank_R = TRUE
-    )
-
-    ##--- Organize Data and parameters into list
-    sim_data_params <-  list(
-      data = data,
-      covars = covars,
-      xi_true = xi_true,
-      alpha_true = alpha_true,
-      mu_true = mu_true,
-      sigma_true = sigma_true,
-      beta_true = beta_true
-    )
-
-  }else{
-
-    player_random_matrix = mu_true
-
-    ##--- Simulate the data
-    data <- simulate_z(
-      player_random_matrix, sigma_true,
-      num_items, num_raters, num_criteria,
-      partial_raters, missing_percent,
-      rank_R = TRUE
-    )
-
-    covars = FALSE
-    beta_true = FALSE
-
-    ##--- Organize Data and parameters into list
-    sim_data_params <-  list(
-      data = data,
-      covars = covars,
-      xi_true = xi_true,
-      alpha_true = alpha_true,
-      mu_true = mu_true,
-      sigma_true = sigma_true,
-      beta_true = beta_true
-    )
-
-  }
-
-
-  return(
-    sim_data_params
-  )
-
-}
-
-
-
-# Function: Running Model ------------------------------------------------------
-
-run_bmmr <- function(num_raters,
+#' Run Bayesian Multivariate Rank Regression Model
+#'
+#' @param num_raters number of raters: integer
+#' @param num_items number of items: integer
+#' @param num_criteria  number of criteria: integer
+#' @param data  the data: array
+#' @param samps number of samples post-burnin: integer
+#' @param burnin number of burnin samples: integer
+#' @param covars_present TRUE if covariates, FALSE if none
+#' @param covars covariate data: array
+#' @param mu_0 prior mean for xi: real number
+#' @param sigma_0  prior variance for xi: real number
+#' @param alpha_0 prior for alpha: real number
+#' @param beta_0 prior mean for beta: real number
+#' @param sum_0_inverse prior variance for beta: real number
+#' @param lambda prior for sigma: real number
+#' @param seed it's a seed what more do you need: integer
+#'
+#' @returns list of posterior values with burnin removed
+#' @export
+#'
+#' @examples
+#'
+#' num_raters <- 10
+#'
+run_bmrr <- function(num_raters,
                      num_items,
                      num_criteria,
                      data,
@@ -142,28 +42,6 @@ run_bmmr <- function(num_raters,
                      seed
 ){
 
-
-  #num_raters: number of raters (integer)
-  #num_items: number of items (integer)
-  #num_criteria: number of criteria (integer)
-  #data: The data (array)
-  #samps: number of samples post-burin (integer)
-  #burnin: number of burnin samples (integer)
-  #covars: covariate data
-
-  #--- Prior for xi (hierarchical mean)
-  # mu_0: prior mean
-  # sigma_0: prior variance
-
-  #--- Prior for alpha (hierarchical variance)
-  #alpha_0
-
-  #--- Prior for beta
-  #beta_0: prior mean
-  #sum_0_inverse: prior variance
-
-  #--- Prior for Sigma
-  #lambda
 
   set.seed(seed)
 
@@ -430,7 +308,7 @@ run_bmmr <- function(num_raters,
 
     ### Step 5: Update Beta ---------------------------------------------------
     if(covars_present == TRUE){
-      #--- getting sigma & mean portion
+      #--- getting sigma & mean
       sigma_sum = matrix(0, nrow = dim(xtx)[1], ncol = dim(xtx)[2])
       mean_sum = matrix(0, nrow = dim(xtx)[1], ncol = 1)
       mu_sum = matrix(0, nrow = dim(xtx)[1], ncol = 1)
@@ -444,7 +322,7 @@ run_bmmr <- function(num_raters,
       sigma_betas_inv = solve(sigma_betas)
       mean_betas =  (mean_sum - mu_sum) + sum_0_inverse%*%beta_0
 
-      #--- sampling portion
+      #--- sampling
       betas_current <- mvrnorm(n = 1, mu = sigma_betas_inv%*%mean_betas, Sigma = sigma_betas_inv)
 
       beta_posterior[k+1,] <- betas_current
@@ -461,7 +339,6 @@ run_bmmr <- function(num_raters,
 
       for(j in 1:m){
         for(l in 1:K){
-
           sum_squares_value_now = (z_ij_last[i,j,l] - mu_posterior[k+1, j,l] - beta_posterior[k+1,]%*%covars[j,,l]  )^2
           beta_sigma_list = c(beta_sigma_list, sum_squares_value_now)
         }

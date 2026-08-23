@@ -1,11 +1,28 @@
 Package: bmrr
-Title: What the Package Does (One Line, Title Case)
+Title: Run a Bayesina Multivaraite Rank Regression Model 
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Rose", "Graves", , "rosekgraves@gmail.com", role = c("aut", "cre"))
+Description: A model for analyzing and aggregating multivaraite rank data. Using latent
+  hierarchical regression models, bmrr pools information across raters and criteria, 
+  incorporates covariates and rater expertise, and constructs an aggregate
+  ranking. bmrr provides full posterior uncertainty quantification for
+  this aggregate ranking and all model parameters, and readily handles partial rankings 
+  and ties. The package includes a data sample mechanism and example sports data.
+License: MIT + file LICENSE
+Imports:
+    dplyr,
+    tidyr,
+    stats,
+    utils,
+    truncnorm,
+    MCMCpack,
+    MASS
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 8.1.0
+Config/roxygen2/version: 8.1.0
+LazyData: true
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
