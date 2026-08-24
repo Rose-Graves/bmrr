@@ -1,0 +1,152 @@
+---
+output: github_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+options(tibble.print_min = 5, tibble.print_max = 5)
+```
+
+## Overview
+
+The **bmrr** package fits a Bayesian Multivariate Rank Regression (BMRR). The BMRR model serves to aggregate multivariate ranking data in cases where raters rank multiple items over multiple time points or criteria. Using latent hierarchical regression models, BMRR pools information across raters and criteria, incorporates covariates and rater expertise, and constructs an aggregate ranking. Crucially, BMRR provides full posterior uncertainty quantification for this aggregate ranking and all model parameters, and readily handles partial (i.e., incomplete) rankings and ties. In addition to fitting the model, the package provides helpful posterior distribution plots to analyze aspects of the aggregated ranking, the raters themselves, the covariate effects, and provides comparisons across items.
+
+## How to use bmrr
+
+```{r, eval = FALSE}
+library(bmrr)
+```
+
+Below we walk through a simple simulated example using most of the functions within bmrr. Within this example we have 10 items and 8 raters ranking them over 3 time points with some partial rankings (some raters not ranking all the items at every time point).
+
+For an applied example on sports ranking data please see the vignettes folder.
+
+```{r, eval = FALSE}
+
+  # Sampling Specifications ----------------------------------------------------
+  #--- Set seed
+  seed = 24
+  set.seed(seed)
+  
+  #--- Number of samples
+  samps = 4000
+  
+  #--- Burn-in samples
+  burnin = 1000
+  
+  # Data Generation ------------------------------------------------------------
+  #--- number of items 
+  num_items = m =  10
+  
+  #--- number of raters
+  num_raters = n = 8
+  
+  #--- number of times
+  num_criteria = K = 3
+  
+  #--- number of covariates
+  num_covars = c = 2
+  covars_present = TRUE
+  
+  #--- variance between raters/items to be the same
+  same_alpha = TRUE 
+  same_sigma = TRUE
+  
+  #--- Missingness levels in the data
+  partial_raters = 4
+  missing_percent = 0.3
+  
+  #--- Simulate the data & parameters
+  sim_data_parms <- simulate_data(num_items,     
+                                  same_alpha,
+                                  num_criteria,
+                                  num_raters,    
+                                  same_sigma,
+                                  num_covars,
+                                  partial_raters,
+                                  missing_percent,
+                                  seed
+  )
+  
+  
+  data <- sim_data_parms$data
+  covars <- sim_data_parms$covars
+```
+
+```{r, eval = FALSE}
+  # Priors -----------------------------------------------------------------------
+  
+  #--- Prior for xi (hierarchical mean)
+  mu_0 = 0
+  sigma_0 = 1
+  
+  #--- Prior for alpha (hierarchical variance)
+  alpha_0 = .8
+  
+  #--- Prior for beta
+  beta_0 = rep(0, c+1) #there are 'c' coefficients 
+  sum_0 = diag(100,c+1) #there are 'c' coefficients
+  sum_0_inverse = solve(sum_0)
+  
+  #--- Prior for Sigma
+  lambda = .8
+  
+  # Running Simulation -----------------------------------------------------------
+  posteior_output <- run_bmmr(num_raters,
+                              num_items,
+                              num_criteria,
+                              data,
+                              samps,
+                              burnin,
+                              covars_present,
+                              covars,
+                              
+                              mu_0,
+                              sigma_0,
+                              alpha_0,
+                              beta_0,
+                              sum_0_inverse,
+                              lambda,
+                              
+                              seed
+  )
+  
+  # Output Options ---------------------------------------------------------------
+  
+  #--- Mu Posterior
+  mu_posterior <- posteior_output$mu_posterior
+  
+  #--- Xi Posterior
+  xi_posterior <- posteior_output$xi_posterior
+  
+  #--- Sigma Posterior
+  sigma_posterior <- posteior_output$sigma_posterior
+  
+  #--- Alpha Posterior
+  alpha_posterior <- posteior_output$alpha_posterior 
+  
+  #--- Beta Posterior
+  beta_posterior <- posteior_output$beta_posterior
+  
+  #--- Z Posterior
+  Z_posterior <- posteior_output$Z_posterior
+  
+  #--- Time as an integer
+  time <- as.numeric(posteior_output$time)
+
+
+```
+
+## Installation
+
+```{r, eval = FALSE}
+if (!requireNamespace("remotes")) {
+  install.packages("remotes")
+}
+remotes::install_github("Rose-Graves/bmrr")
+```
