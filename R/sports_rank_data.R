@@ -15,18 +15,8 @@
 #' \item{Yahoo}{rank by Yahoo for year.}
 #' \item{player_id}{}
 #' \item{player_age}{player age at year.}
-#' \item{pa}{plate apperances from previous year.}
-#' \item{ab}{at bats from previous year.}
-#' \item{k_percentage}{k percentage from previous year.}
-#' \item{bb_percentage}{bb percentage from previous year.}
-#' \item{batting_avg}{batting average from previous year.}
-#' \item{slg_percent}{slg percentage from previous year}
-#' \item{exit_velocity_avg}{exit velo from previous year}
-#' \item{barrel_batted_rate}{barrel batted rate from previous year}
-#' \item{whiff_percent}{whiff percentage from previous year}
 #' \item{WAR}{Wins Above Replacement from previous year.}
 #' \item{BaseSalary}{Base salary from previous year.}
-#' \item{n}{number of years ranked.}
 #' }
 #' @examples
 #'   sports_rank_data
