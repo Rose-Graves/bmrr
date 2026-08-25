@@ -178,7 +178,7 @@ mu_beta_plot_list[[6]] # MAIN PLOT FOR PAPER
 
 ```
 
-```{r, eval }
+```{r, eval  = FALSE}
 
 ## Posterior Xi ----------------------------------------------------------------
 xi_plot_list <- xi_plots(xi_posterior, 
@@ -189,7 +189,7 @@ xi_plot_list[[2]] # PLOT FOR PAPER
 
 ```
 
-```{r}
+```{r, eval = FALSE}
 
 covariate_names <- c( "Age", "WAR", "Salary")
 
@@ -202,7 +202,7 @@ beta_plots_list[[2]] # plot for paper
 
 ```
 
-```{r}
+```{r, eval  = FALSE}
 ranker_names <-c("ESPN","CBS", "MLB","BR","Yahoo")
 colMeans(sigma_posterior)
 colSds(sigma_posterior)
@@ -213,7 +213,7 @@ sigma_plots_list
 
 ```
 
-```{r}
+```{r, eval  = FALSE}
 
 time1 = (mu_posterior[, ,4] + (beta_posterior%*%t(covars[,,4]))) %>% 
   as.data.frame()%>%
