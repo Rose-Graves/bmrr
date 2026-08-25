@@ -22,7 +22,7 @@
 #' @importFrom stats runif rnorm sd quantile
 #' @import utils
 #' @importFrom truncnorm rtruncnorm
-#' @import MCMCpack
+#' @importFrom MCMCpack rinvgamma
 #' @importFrom MASS mvrnorm
 #'
 #' @export
@@ -68,7 +68,7 @@ run_bmrr <- function(num_raters,
   }
 
   #--- Getting number of covariates
-  num_covars = dim(covars)[2] - 1
+  num_covars = dim(covars)[2]
 
   #--- Initial Z values
   z_ij_last = array(NA, dim = c(num_raters,num_items,num_criteria))
@@ -106,8 +106,8 @@ run_bmrr <- function(num_raters,
   alpha_posterior[1,] <- rep(1/8, m)
 
   #--- Setting beta_posterior matrix and setting initial values at 0
-  beta_posterior = matrix(NA, ncol = num_covars+1, nrow = samps+burnin+1)
-  beta_posterior[1,] = rep(0, num_covars+1)
+  beta_posterior = matrix(NA, ncol = num_covars, nrow = samps+burnin+1)
+  beta_posterior[1,] = rep(0, num_covars)
 
   pb <- txtProgressBar(min = 1, max = samps+burnin, style = 3)
 
@@ -278,7 +278,7 @@ run_bmrr <- function(num_raters,
       }
       alpha_alpha = (K/2) + (1/alpha_0)
       alpha_beta = (1/2)*sum(mu_zeta_diff) + alpha_0
-      alpha_samp = c(alpha_samp, rinvgamma(1, alpha_alpha, alpha_beta))
+      alpha_samp = c(alpha_samp, MCMCpack::rinvgamma(1, alpha_alpha, alpha_beta))
     }
 
     alpha_posterior[k+1,] <- alpha_samp
@@ -330,7 +330,7 @@ run_bmrr <- function(num_raters,
       mean_betas =  (mean_sum - mu_sum) + sum_0_inverse%*%beta_0
 
       #--- sampling
-      betas_current <- mvrnorm(n = 1, mu = sigma_betas_inv%*%mean_betas, Sigma = sigma_betas_inv)
+      betas_current <- MASS::mvrnorm(n = 1, mu = sigma_betas_inv%*%mean_betas, Sigma = sigma_betas_inv)
 
       beta_posterior[k+1,] <- betas_current
     }else{
@@ -354,7 +354,7 @@ run_bmrr <- function(num_raters,
       beta_sigma_post = (1/2)*beta_sigma_sum + lambda
 
       #--- Sample Posterior sigma
-      sigma_i = rinvgamma(1, alpha_sigma_post, beta_sigma_post)
+      sigma_i = MCMCpack::rinvgamma(1, alpha_sigma_post, beta_sigma_post)
 
       #--- save off posterior sigma
       sigma_posterior[k+1, i] = sigma_i

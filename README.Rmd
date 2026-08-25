@@ -112,8 +112,8 @@ sigma_0 = rep(1,m) #1
 alpha_0 <- .8
 
 #--- Prior for beta
-beta_0 = rep(0, c+1) #there are 'c' coefficients 
-sum_0 = diag(100,c+1) #there are 'c' coefficients
+beta_0 = rep(0, c) #there are 'c' coefficients 
+sum_0 = diag(100,c) #there are 'c' coefficients
 sum_0_inverse = solve(sum_0)
 
 #--- Prior for Sigma

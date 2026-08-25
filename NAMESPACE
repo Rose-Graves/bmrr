@@ -7,7 +7,6 @@ export(mu_plots)
 export(run_bmrr)
 export(sigma_plots)
 export(xi_plots)
-import(MCMCpack)
 import(dplyr)
 import(forcats)
 import(ggplot2)
@@ -20,6 +19,7 @@ import(stringr)
 import(tidyr)
 import(utils)
 importFrom(MASS,mvrnorm)
+importFrom(MCMCpack,rinvgamma)
 importFrom(stats,
   quantile,
   rnorm,
