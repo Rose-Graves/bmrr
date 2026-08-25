@@ -22,8 +22,11 @@ Imports:
     latex2exp,
     forcats,
     ggthemes,
-    ggridges
-
+    ggridges,
+    scales,
+    tibble,
+    stringr,
+    rlang
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Config/roxygen2/version: 8.1.0
@@ -31,6 +34,5 @@ LazyData: true
 Suggests: 
     knitr,
     rmarkdown
-VignetteBuilder: knitr
 URL: https://github.com/Rose-Graves/bmrr
 BugReports: https://github.com/Rose-Graves/bmrr/issues

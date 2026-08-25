@@ -7,6 +7,18 @@
 #' @param criteria_names a vector of criteria names that you want labeled on the graph
 #'
 #' @returns a list of plots
+#'
+#' @import dplyr
+#' @import tidyr
+#' @import ggplot2
+#' @import latex2exp
+#' @import forcats
+#' @import ggthemes
+#' @import ggridges
+#' @import scales
+#' @import stringr
+#' @import rlang
+#'
 #' @export
 #'
 #' @examples
@@ -56,12 +68,12 @@ mu_plots <- function(mu_posterior,
           iter = row_number()
         )%>%
         pivot_longer(
-          cols = -iter,
+          cols = -.data$iter,
           names_to = "Item",
           values_to = "mu_posterior"
         )%>%
         mutate(
-          Item = paste("Item", str_replace(Item, "V", ""))
+          Item = paste("Item", str_replace(.data$Item, "V", ""))
         )
     }else{
       names(mu_post_trace_df_og) <- item_names
@@ -70,7 +82,7 @@ mu_plots <- function(mu_posterior,
           iter = row_number()
         )%>%
         pivot_longer(
-          cols = -iter,
+          cols = -.data$iter,
           names_to = "Item",
           values_to = "mu_posterior"
         )
@@ -78,10 +90,10 @@ mu_plots <- function(mu_posterior,
 
     g_trace <-   ggplot(data = mu_post_trace_df,
                         aes(
-                          x = iter,
-                          y = mu_posterior,
-                          color = Item,
-                          group = Item
+                          x = .data$iter,
+                          y = .data$mu_posterior,
+                          color = .data$Item,
+                          group = .data$Item
                         ))+geom_line() +
       ylab(TeX("$\\mu$ Posterior"))+
       xlab("Iteration")+ theme_bw() +
@@ -104,9 +116,9 @@ mu_plots <- function(mu_posterior,
 
     posterior_mean = posterior_mean %>%
       tibble::rownames_to_column("Item")%>%
-      arrange(`50%`)%>%
+      arrange(.data$`50%`)%>%
       mutate(
-        rank = rank(-`50%`)
+        rank = rank(-.data$`50%`)
       )
 
 
@@ -116,18 +128,18 @@ mu_plots <- function(mu_posterior,
                    values_to = "Mu Posterior")
 
     g_dist <- ggplot(data = mu_graph_data%>%
-                       group_by(Item)%>%
+                       group_by(.data$Item)%>%
                        mutate(
-                         mean = mean(`Mu Posterior`)
+                         mean = mean(.data$`Mu Posterior`)
                        )%>%
                        ungroup()%>%
                        arrange(desc(-mean))%>%
-                       mutate(Item = fct_reorder(Item, desc(-mean)))
+                       mutate(Item = fct_reorder(.data$Item, desc(-mean)))
                      ,
                      aes(
-                       y = Item,
-                       x = `Mu Posterior`,
-                       group = Item
+                       y = .data$Item,
+                       x = .data$`Mu Posterior`,
+                       group = .data$Item
                      ))+
       geom_density_ridges(rel_min_height = 0.001, scale = 2)+
       xlab(TeX("Posterior $\\mu")) +
@@ -153,11 +165,27 @@ mu_plots <- function(mu_posterior,
 #' @param item_names a vector of items names that you want labeled on the graph
 #' @param criteria_names a vector of criteria names that you want labeled on the graph
 #'
+#'
 #' @returns a list of plots
+#'
+#' @import dplyr
+#' @import tidyr
+#' @import ggplot2
+#' @import latex2exp
+#' @import forcats
+#' @import ggthemes
+#' @import ggridges
+#' @import scales
+#' @import stringr
+#' @import rlang
+#'
 #' @export
 #'
 #' @examples
-#'
+#' iter = 1000
+#' num_items = 10
+#' num_criteria = 3
+#' num_covars = 5
 #' variation = c(rep(-2,iter), rep(-1, iter), rep(0, iter), rep(1, iter), rep(2, iter))
 #' mu_posterior <- array(
 #'   rnorm(iter*num_items*num_criteria, mean = 0 + variation, sd = 1),
@@ -217,15 +245,15 @@ mu_beta_plots <- function(mu_posterior,
           iter = row_number()
         )%>%
         pivot_longer(
-          cols = -iter,
+          cols = -.data$iter,
           names_to = "Item",
           values_to = "mu_posterior"
         )%>%
         mutate(
-          Item = paste("Item", str_replace(Item, "V", ""))
+          Item = paste("Item", str_replace(.data$Item, "V", ""))
         )%>%
-        filter(
-          iter %% 5 == 0
+        dplyr::filter(
+          .data$iter %% 5 == 0
         )
     }else{
       names(mu_post_trace_df_og) <- item_names
@@ -234,21 +262,21 @@ mu_beta_plots <- function(mu_posterior,
           iter = row_number()
         )%>%
         pivot_longer(
-          cols = -iter,
+          cols = -.data$iter,
           names_to = "Item",
           values_to = "mu_posterior"
         )%>%
-        filter(
-          iter %% 5 == 0
+        dplyr::filter(
+          .data$iter %% 5 == 0
         )
     }
 
     g_trace <-   ggplot(data = mu_post_trace_df,
                         aes(
-                          x = iter,
-                          y = mu_posterior,
-                          color = Item,
-                          group = Item
+                          x = .data$iter,
+                          y = .data$mu_posterior,
+                          color = .data$Item,
+                          group = .data$Item
                         ))+geom_line() +
       ylab(TeX("$\\mu_{j,k} + \\beta X_{j,k}$ Posterior"))+
       xlab("Iteration")+theme_bw()+
@@ -272,9 +300,9 @@ mu_beta_plots <- function(mu_posterior,
 
     posterior_mean = posterior_mean %>%
       tibble::rownames_to_column("Item")%>%
-      arrange(`50%`)%>%
+      arrange(.data$`50%`)%>%
       mutate(
-        rank = rank(-`50%`)
+        rank = rank(-.data$`50%`)
       )
 
 
@@ -284,18 +312,18 @@ mu_beta_plots <- function(mu_posterior,
                    values_to = "Mu Posterior")
 
     g_dist <- ggplot(data = mu_graph_data%>%
-                       group_by(Item)%>%
+                       group_by(.data$Item)%>%
                        mutate(
-                         mean = mean(`Mu Posterior`)
+                         mean = mean(.data$`Mu Posterior`)
                        )%>%
                        ungroup()%>%
                        arrange(desc(-mean))%>%
-                       mutate(Item = fct_reorder(Item, desc(-mean)))
+                       mutate(Item = fct_reorder(.data$Item, desc(-mean)))
                      ,
                      aes(
-                       y = Item,
-                       x = `Mu Posterior`,
-                       group = Item
+                       y = .data$Item,
+                       x = .data$`Mu Posterior`,
+                       group = .data$Item
                      ))+
       geom_density_ridges(rel_min_height = 0.001, scale = 2)+
       xlab(TeX("Posterior $\\mu_{j,k} + \\beta X_{j,k}$")) +
@@ -320,6 +348,18 @@ mu_beta_plots <- function(mu_posterior,
 #' @param item_names a vector of items names that you want labeled on the graph
 #'
 #' @returns a list of plots
+#'
+#' @import dplyr
+#' @import tidyr
+#' @import ggplot2
+#' @import latex2exp
+#' @import forcats
+#' @import ggthemes
+#' @import ggridges
+#' @import scales
+#' @import stringr
+#' @import rlang
+#'
 #' @export
 #'
 #' @examples
@@ -331,7 +371,7 @@ mu_beta_plots <- function(mu_posterior,
 #'   dim = c(iter,num_items)
 #'   )
 #' item_names <- paste0("player_",1:num_items)
-#'  xi_plots(mu_posterior, item_names)
+#'  xi_plots(xi_posterior, item_names)
 xi_plots <- function(xi_posterior,
                      item_names = FALSE
 ){
@@ -354,12 +394,12 @@ xi_plots <- function(xi_posterior,
         iter = row_number()
       )%>%
       pivot_longer(
-        cols = -iter,
+        cols = -.data$iter,
         names_to = "Item",
         values_to = "xi_posterior"
       )%>%
       mutate(
-        Item = paste("Item", str_replace(Item, "V", ""))
+        Item = paste("Item", str_replace(.data$Item, "V", ""))
       )
   }else{
     names(xi_post_trace_df_og) <- item_names
@@ -368,7 +408,7 @@ xi_plots <- function(xi_posterior,
         iter = row_number()
       )%>%
       pivot_longer(
-        cols = -iter,
+        cols = -.data$iter,
         names_to = "Item",
         values_to = "xi_posterior"
       )
@@ -376,10 +416,10 @@ xi_plots <- function(xi_posterior,
 
   g_trace <-   ggplot(data = xi_post_trace_df,
                       aes(
-                        x = iter,
-                        y = xi_posterior,
-                        color = Item,
-                        group = Item
+                        x = .data$iter,
+                        y = .data$xi_posterior,
+                        color = .data$Item,
+                        group = .data$Item
                       ))+geom_line() +
     ylab(TeX("$\\xi$ Posterior"))+
     xlab("Iteration")+
@@ -402,9 +442,9 @@ xi_plots <- function(xi_posterior,
 
   posterior_mean = posterior_mean %>%
     tibble::rownames_to_column("Item")%>%
-    arrange(`50%`)%>%
+    arrange(.data$`50%`)%>%
     mutate(
-      rank = rank(-`50%`)
+      rank = rank(-.data$`50%`)
     )
 
 
@@ -414,18 +454,18 @@ xi_plots <- function(xi_posterior,
                  values_to = "Xi Posterior")
 
   g_dist <- ggplot(data = xi_graph_data%>%
-                     group_by(Item)%>%
+                     group_by(.data$Item)%>%
                      mutate(
-                       mean = mean(`Xi Posterior`)
+                       mean = mean(.data$`Xi Posterior`)
                      )%>%
                      ungroup()%>%
                      arrange(desc(-mean))%>%
-                     mutate(Item = fct_reorder(Item, desc(-mean)))
+                     mutate(Item = fct_reorder(.data$Item, desc(-mean)))
                    ,
                    aes(
-                     y = Item,
-                     x = `Xi Posterior`,
-                     group = Item
+                     y = .data$Item,
+                     x = .data$`Xi Posterior`,
+                     group = .data$Item
                    ))+
     geom_density_ridges(rel_min_height = 0.001, scale = 2)+
     xlab(TeX("Posterior $\\xi")) +
@@ -447,6 +487,18 @@ xi_plots <- function(xi_posterior,
 #' @param covariate_names a vector of covariate names that you want labeled on the graph
 #'
 #' @returns a list of plots
+#'
+#' @import dplyr
+#' @import tidyr
+#' @import ggplot2
+#' @import latex2exp
+#' @import forcats
+#' @import ggthemes
+#' @import ggridges
+#' @import scales
+#' @import stringr
+#' @import rlang
+#'
 #' @export
 #'
 #' @examples
@@ -478,27 +530,27 @@ beta_plots <- function(beta_posterior,
     )
 
   g1 <- ggplot(data = beta_posterior_long,
-               aes(x = BetaPosterior,
-                   group = Variable,
-                   color = Variable
+               aes(x = .data$BetaPosterior,
+                   group = .data$Variable,
+                   color = .data$Variable
                ))+geom_boxplot()+theme_bw()
 
 
 
   g_dist <- ggplot(data = beta_posterior_long%>%
-                     group_by(Variable)%>%
-                     filter(Variable != 'Intercept')%>%
+                     group_by(.data$Variable)%>%
+                     dplyr::filter(.data$Variable != 'Intercept')%>%
                      mutate(
-                       mean = mean(`BetaPosterior`)
+                       mean = mean(.data$`BetaPosterior`)
                      )%>%
                      ungroup()%>%
                      arrange(desc(-mean))%>%
-                     mutate(Variable = fct_reorder(Variable, desc(-mean)))
+                     mutate(Variable = fct_reorder(.data$Variable, desc(-mean)))
                    ,
                    aes(
-                     y = Variable,
-                     x = `BetaPosterior`,
-                     group = Variable
+                     y = .data$Variable,
+                     x = .data$`BetaPosterior`,
+                     group = .data$Variable
                    ))+
     geom_density_ridges(rel_min_height = 0.001, scale = 2) + theme_bw(base_size = 16) +
     xlab(TeX("Posterior $\\beta$"))+
@@ -518,6 +570,18 @@ beta_plots <- function(beta_posterior,
 #' @param ranker_names a vector of ranker names that you want labeled on the graph
 #'
 #' @returns a list of plots
+#'
+#' @import dplyr
+#' @import tidyr
+#' @import ggplot2
+#' @import latex2exp
+#' @import forcats
+#' @import ggthemes
+#' @import ggridges
+#' @import scales
+#' @import stringr
+#' @import rlang
+#'
 #' @export
 #'
 #' @examples
@@ -544,26 +608,26 @@ sigma_plots <- function(sigma_posterior,
     )
 
   g1 <- ggplot(data = sigma_posterior_long,
-               aes(x = Sigma,
-                   group = Rater,
-                   color = Rater
+               aes(x = .data$Sigma,
+                   group = .data$Rater,
+                   color = .data$Rater
                ))+geom_boxplot()
 
 
   g_dist <- ggplot(data = sigma_posterior_long%>%
-                     group_by(Rater)%>%
+                     group_by(.data$Rater)%>%
                      mutate(
-                       `Sigma Posterior` = Sigma,
-                       mean = mean(Sigma)
+                       `Sigma Posterior` = .data$Sigma,
+                       mean = mean(.data$Sigma)
                      )%>%
                      ungroup()%>%
                      arrange(desc(-mean))%>%
-                     mutate(Rater = fct_reorder(Rater, desc(-mean)))
+                     mutate(Rater = fct_reorder(.data$Rater, desc(-mean)))
                    ,
                    aes(
-                     y = Rater,
-                     x = `Sigma Posterior`,
-                     group = Rater
+                     y = .data$Rater,
+                     x = .data$`Sigma Posterior`,
+                     group = .data$Rater
                    ))+
     geom_density_ridges(rel_min_height = 0.001, scale = 2)+
     xlab(TeX("Posterior $\\sigma^2")) +
@@ -582,6 +646,18 @@ sigma_plots <- function(sigma_posterior,
 #' @param alpha_posterior the posterior alpha object obtained by running the run_bmrr function
 #'
 #' @returns a plot
+#'
+#' @import dplyr
+#' @import tidyr
+#' @import ggplot2
+#' @import latex2exp
+#' @import forcats
+#' @import ggthemes
+#' @import ggridges
+#' @import scales
+#' @import stringr
+#' @import rlang
+#'
 #' @export
 #'
 #' @examples
@@ -597,16 +673,16 @@ alpha_plots <- function(alpha_posterior){
 
   alpha_posterior_long <- alpha_posterior %>%
     data.frame()%>%
-    pivot_longer(
+    tidyr::pivot_longer(
       everything(),
       names_to = "Item",
       values_to = "Alpha"
     )
 
   g1 <- ggplot(data = alpha_posterior_long,
-               aes(x = Alpha,
-                   group = Item,
-                   color = Item
+               aes(x = .data$Alpha,
+                   group = .data$Item,
+                   color = .data$Item
                ))+geom_boxplot()+theme_bw()
 
 

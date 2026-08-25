@@ -18,6 +18,13 @@
 #' @param seed it's a seed what more do you need: integer
 #'
 #' @returns list of posterior values with burnin removed
+#'
+#' @importFrom stats runif rnorm sd quantile
+#' @import utils
+#' @importFrom truncnorm rtruncnorm
+#' @import MCMCpack
+#' @importFrom MASS mvrnorm
+#'
 #' @export
 #'
 #' @examples
@@ -127,7 +134,7 @@ run_bmrr <- function(num_raters,
               lower_rank = which(current_ranks==j+1) #Getting placement item ranked 2nd
               current_mean = mu_posterior[k,current_rank_loc,l]+ sum(covars[current_rank_loc,,l]*beta_posterior[k,]) # Getting the mean
 
-              z_ij = rtruncnorm(
+              z_ij = truncnorm::rtruncnorm(
                 1,
                 a = z_ij_last[i,lower_rank,l],
                 b = 10,
@@ -143,7 +150,7 @@ run_bmrr <- function(num_raters,
               upper_rank = which(current_ranks== j-1)
               current_mean = mu_posterior[k,current_rank_loc,l]+ sum(covars[current_rank_loc,,l]*beta_posterior[k,]) # Getting the mean
 
-              z_ij = rtruncnorm(
+              z_ij = truncnorm::rtruncnorm(
                 1,
                 a = -10,
                 b = z_ij_last[i,upper_rank,l],
@@ -159,7 +166,7 @@ run_bmrr <- function(num_raters,
               upper_rank = which(current_ranks==j-1)
               current_mean = mu_posterior[k,current_rank_loc,l]+ sum(covars[current_rank_loc,,l]*beta_posterior[k,]) # Getting the mean
 
-              z_ij = rtruncnorm(
+              z_ij = truncnorm::rtruncnorm(
                 1,
                 a = z_ij_last[i,lower_rank,l],
                 b = z_ij_last[i,upper_rank,l],
@@ -180,7 +187,7 @@ run_bmrr <- function(num_raters,
               lower_rank = which(current_ranks==j+1)
               current_mean = mu_posterior[k,current_rank,l]+ sum(covars[current_rank,,l]*beta_posterior[k,]) # Getting the mean
 
-              z_ij = rtruncnorm(
+              z_ij = truncnorm::rtruncnorm(
                 1,
                 a = z_ij_last[i,lower_rank,l],
                 b = 10,
@@ -194,7 +201,7 @@ run_bmrr <- function(num_raters,
               upper_rank = which(current_ranks== j-1)
               current_mean = mu_posterior[k,current_rank,l]+ sum(covars[current_rank,,l]*beta_posterior[k,]) # Getting the mean
 
-              z_ij = rtruncnorm(
+              z_ij = truncnorm::rtruncnorm(
                 1,
                 a = ifelse(is.na(max(z_ij_last[i,unranked_loc,l] )),-10, max(z_ij_last[i,unranked_loc,l] )),
                 b = z_ij_last[i,upper_rank,l],
@@ -209,7 +216,7 @@ run_bmrr <- function(num_raters,
               upper_rank = which(current_ranks==j-1)
               current_mean = mu_posterior[k,current_rank,l]+ sum(covars[current_rank,,l]*beta_posterior[k,]) # Getting the mean
 
-              z_ij = rtruncnorm(
+              z_ij = truncnorm::rtruncnorm(
                 1,
                 a = z_ij_last[i,lower_rank,l],
                 b = z_ij_last[i,upper_rank,l],
@@ -225,7 +232,7 @@ run_bmrr <- function(num_raters,
             upper_rank = which(current_ranks==max_rank)
             current_mean = mu_posterior[k,current_rank,l]+ sum(covars[current_rank,,l]*beta_posterior[k,]) # Getting the mean
 
-            z_ij = rtruncnorm(
+            z_ij = truncnorm::rtruncnorm(
               1,
               a = -10,
               b = z_ij_last[i,upper_rank,l],

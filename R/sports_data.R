@@ -13,11 +13,11 @@
 #' \item{MLB}{rank by MLB for year.}
 #' \item{BR}{rank by Bleacher Report for year.}
 #' \item{Yahoo}{rank by Yahoo for year.}
-#' \item{player_id}{}
+#' \item{player_id}{unique player id.}
 #' \item{player_age}{player age at year.}
 #' \item{WAR}{Wins Above Replacement from previous year.}
 #' \item{BaseSalary}{Base salary from previous year.}
 #' }
 #' @examples
-#'   sports_rank_data
-"sports_rank_data"
+#'   sports_data
+"sports_data"

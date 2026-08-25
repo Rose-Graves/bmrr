@@ -18,13 +18,21 @@ The **bmrr** package fits a Bayesian Multivariate Rank Regression (BMRR). The BM
 
 ## How to use bmrr
 
-```{r, eval = FALSE}
+```{r}
+#--- Load in package
 library(bmrr)
+
+#--- Load in some additional packages
+library(dplyr)
+library(ggplot2)
+library(tidyr)
 ```
 
 Below we walk through an applied example with Major League Baseball (MLB) ranking data.
 
 ```{r}
+#--- Load in the data
+data(sports_data)
 
 # Define Simulation Starting values & Priors ----------------------------------
 
@@ -93,9 +101,6 @@ data <- sports_data_array
 
 ```
 
-
-
-
 ```{r}
 # Priors -----------------------------------------------------------------------
 
@@ -116,7 +121,7 @@ lambda = .8
 
 
 # Run Simulation ------------------------------------------------------------
-posterior_output <- run_bmmr(num_raters,
+posterior_output <- run_bmrr(num_raters,
                      num_items,
                      num_criteria,
                      data,
@@ -160,9 +165,7 @@ time <- as.numeric(posterior_output$time)
 
 ```
 
-
-
-```{r}
+```{r, eval = FALSE}
 
 mu_beta_plot_list <- mu_beta_plots(mu_posterior, 
                          beta_posterior,
@@ -170,20 +173,12 @@ mu_beta_plot_list <- mu_beta_plots(mu_posterior,
                          item_names, 
                          criteria_names)
 
-mu_beta_plot_list[[1]]
-mu_beta_plot_list[[2]] 
-mu_beta_plot_list[[3]]
-mu_beta_plot_list[[4]]
 mu_beta_plot_list[[5]]
 mu_beta_plot_list[[6]] # MAIN PLOT FOR PAPER
-mu_beta_plot_list[[7]] 
-mu_beta_plot_list[[8]]
 
 ```
 
-
-
-```{r}
+```{r, eval }
 
 ## Posterior Xi ----------------------------------------------------------------
 xi_plot_list <- xi_plots(xi_posterior, 
@@ -194,7 +189,6 @@ xi_plot_list[[2]] # PLOT FOR PAPER
 
 ```
 
-
 ```{r}
 
 covariate_names <- c( "Age", "WAR", "Salary")
@@ -203,12 +197,10 @@ covariate_names <- c( "Age", "WAR", "Salary")
 beta_plots_list <- beta_plots(beta_posterior, 
                               covariate_names)
 
-beta_plots_list[[1]]
 beta_plots_list[[2]] # plot for paper
 
 
 ```
-
 
 ```{r}
 ranker_names <-c("ESPN","CBS", "MLB","BR","Yahoo")
@@ -220,9 +212,6 @@ sigma_plots_list <- sigma_plots(sigma_posterior,
 sigma_plots_list
 
 ```
-
-
-
 
 ```{r}
 
@@ -257,63 +246,9 @@ rownames(compare_prob_pos_table) <- item_names
 
 compare_prob_pos_table = round(compare_prob_pos_table, 3)
 
-compare_prob_pos_table%>%
-  dplyr::select(
-    "Willy Adames", 
-    "Alex Bregman" , 
-    "Pete Alonso" ,
-    "Paul Goldschmidt"
-  )
-
-
 compare_prob_pos_table_OF = compare_prob_pos_table %>% 
   dplyr::select(
-    
-    #--- Pitchers
-  #  "Clayton Kershaw",
-  #  "Gerrit Cole",
-  #  "Zack Wheeler",
-  #  "Max Fried",
-  #  "Shane Bieber",
-  #  "Shohei Ohtani",
-  #  "Framber Valdez",
-  #  "Corbin Burnes",
-  #  "Josh Hader" ,
-  #  "Kevin Gausman",
-  #  "Joe Musgrove" ,
-  #  "Aaron Nola", 
-  #  "Edwin Diaz",
-  #  "Luis Castillo",
-  #  
-  #  #--- Infield
-  #  "Nolan Arenado",
-  #  "Paul Goldschmidt",
-  #  "Jose Altuve",
-  #  "Freddie Freeman",    
-  #  "Marcus Semien",
-  #  "Alex Bregman",
-  #  "Willy Adames",
-  #  "Rafael Devers", 
-  #  "Matt Chapman",
-  #  "Bo Bichette",
-  #  "Mookie Betts",
-  #  "Carlos Correa",
-  #  "Willson Contreras",
-  #  "Manny Machado",
-  #  "JT Realmuto" ,
-  #  "Xander Bogaerts",
-  #  "Francisco Lindor",
-  #  "Ketel Marte",
-  #  "Trea Turner",
-  #  "Jose Ramirez",
-  #  "Corey Seager",
-  #  "Matt Olson",
-  #  "Pete Alonso", 
-  #  "Ozzie Albies", 
-  #  "Brandon Lowe" ,
-  #  "Vladimir Guerrero Jr", 
-  #  "Sean Murphy",
-  #  
+
     #--- Outfield
     "George Springer",
     "Mike Trout",          
@@ -374,12 +309,12 @@ heatmap_plot <- ggplot(
   data = long_data,
   aes(x = ColumnItem, y = RowItem, fill = Probability)
 ) +
-  geom_tile(color = "white")+  # Add tiles, with white borders to separate cells
+  geom_tile(color = "white")+  
   theme(
     axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, size = 10),
     axis.text.y = element_text(size = 10),
-    plot.title = element_text(hjust = 0.5, face = "bold"), # Center title
-    panel.grid.major = element_blank(), # Remove grid lines
+    plot.title = element_text(hjust = 0.5, face = "bold"), 
+    panel.grid.major = element_blank(),
     panel.border = element_blank(),
     axis.ticks = element_blank()
   )+ 
@@ -398,7 +333,6 @@ heatmap_plot
 
 
 ```
-
 
 ## Installation
 
